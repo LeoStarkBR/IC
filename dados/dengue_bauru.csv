@@ -1,0 +1,145 @@
+data,bairro,casos
+2023-01-01,Centro,27
+2023-01-01,Geisel,19
+2023-01-01,Jardim Europa,14
+2023-01-01,Mary Dota,30
+2023-01-01,Vila Falcão,34
+2023-01-01,Jardim Bela Vista,27
+2023-02-01,Centro,25
+2023-02-01,Geisel,23
+2023-02-01,Jardim Europa,6
+2023-02-01,Mary Dota,21
+2023-02-01,Vila Falcão,12
+2023-02-01,Jardim Bela Vista,49
+2023-03-01,Centro,11
+2023-03-01,Geisel,23
+2023-03-01,Jardim Europa,26
+2023-03-01,Mary Dota,39
+2023-03-01,Vila Falcão,10
+2023-03-01,Jardim Bela Vista,14
+2023-04-01,Centro,44
+2023-04-01,Geisel,25
+2023-04-01,Jardim Europa,31
+2023-04-01,Mary Dota,33
+2023-04-01,Vila Falcão,23
+2023-04-01,Jardim Bela Vista,18
+2023-05-01,Centro,13
+2023-05-01,Geisel,38
+2023-05-01,Jardim Europa,40
+2023-05-01,Mary Dota,22
+2023-05-01,Vila Falcão,38
+2023-05-01,Jardim Bela Vista,42
+2023-06-01,Centro,10
+2023-06-01,Geisel,31
+2023-06-01,Jardim Europa,29
+2023-06-01,Mary Dota,4
+2023-06-01,Vila Falcão,12
+2023-06-01,Jardim Bela Vista,29
+2023-07-01,Centro,14
+2023-07-01,Geisel,31
+2023-07-01,Jardim Europa,13
+2023-07-01,Mary Dota,20
+2023-07-01,Vila Falcão,46
+2023-07-01,Jardim Bela Vista,5
+2023-08-01,Centro,24
+2023-08-01,Geisel,40
+2023-08-01,Jardim Europa,25
+2023-08-01,Mary Dota,8
+2023-08-01,Vila Falcão,30
+2023-08-01,Jardim Bela Vista,27
+2023-09-01,Centro,27
+2023-09-01,Geisel,24
+2023-09-01,Jardim Europa,34
+2023-09-01,Mary Dota,14
+2023-09-01,Vila Falcão,37
+2023-09-01,Jardim Bela Vista,30
+2023-10-01,Centro,15
+2023-10-01,Geisel,16
+2023-10-01,Jardim Europa,38
+2023-10-01,Mary Dota,22
+2023-10-01,Vila Falcão,13
+2023-10-01,Jardim Bela Vista,36
+2023-11-01,Centro,31
+2023-11-01,Geisel,24
+2023-11-01,Jardim Europa,18
+2023-11-01,Mary Dota,25
+2023-11-01,Vila Falcão,31
+2023-11-01,Jardim Bela Vista,23
+2023-12-01,Centro,25
+2023-12-01,Geisel,23
+2023-12-01,Jardim Europa,20
+2023-12-01,Mary Dota,6
+2023-12-01,Vila Falcão,31
+2023-12-01,Jardim Bela Vista,11
+2024-01-01,Centro,2
+2024-01-01,Geisel,26
+2024-01-01,Jardim Europa,25
+2024-01-01,Mary Dota,17
+2024-01-01,Vila Falcão,44
+2024-01-01,Jardim Bela Vista,9
+2024-02-01,Centro,22
+2024-02-01,Geisel,33
+2024-02-01,Jardim Europa,3
+2024-02-01,Mary Dota,7
+2024-02-01,Vila Falcão,25
+2024-02-01,Jardim Bela Vista,41
+2024-03-01,Centro,20
+2024-03-01,Geisel,37
+2024-03-01,Jardim Europa,13
+2024-03-01,Mary Dota,42
+2024-03-01,Vila Falcão,15
+2024-03-01,Jardim Bela Vista,10
+2024-04-01,Centro,10
+2024-04-01,Geisel,36
+2024-04-01,Jardim Europa,40
+2024-04-01,Mary Dota,33
+2024-04-01,Vila Falcão,20
+2024-04-01,Jardim Bela Vista,24
+2024-05-01,Centro,37
+2024-05-01,Geisel,35
+2024-05-01,Jardim Europa,15
+2024-05-01,Mary Dota,24
+2024-05-01,Vila Falcão,29
+2024-05-01,Jardim Bela Vista,21
+2024-06-01,Centro,15
+2024-06-01,Geisel,20
+2024-06-01,Jardim Europa,19
+2024-06-01,Mary Dota,30
+2024-06-01,Vila Falcão,32
+2024-06-01,Jardim Bela Vista,19
+2024-07-01,Centro,28
+2024-07-01,Geisel,18
+2024-07-01,Jardim Europa,14
+2024-07-01,Mary Dota,13
+2024-07-01,Vila Falcão,34
+2024-07-01,Jardim Bela Vista,24
+2024-08-01,Centro,24
+2024-08-01,Geisel,27
+2024-08-01,Jardim Europa,10
+2024-08-01,Mary Dota,36
+2024-08-01,Vila Falcão,10
+2024-08-01,Jardim Bela Vista,12
+2024-09-01,Centro,15
+2024-09-01,Geisel,21
+2024-09-01,Jardim Europa,15
+2024-09-01,Mary Dota,24
+2024-09-01,Vila Falcão,30
+2024-09-01,Jardim Bela Vista,34
+2024-10-01,Centro,33
+2024-10-01,Geisel,25
+2024-10-01,Jardim Europa,26
+2024-10-01,Mary Dota,28
+2024-10-01,Vila Falcão,10
+2024-10-01,Jardim Bela Vista,31
+2024-11-01,Centro,12
+2024-11-01,Geisel,13
+2024-11-01,Jardim Europa,12
+2024-11-01,Mary Dota,17
+2024-11-01,Vila Falcão,31
+2024-11-01,Jardim Bela Vista,10
+2024-12-01,Centro,18
+2024-12-01,Geisel,31
+2024-12-01,Jardim Europa,21
+2024-12-01,Mary Dota,25
+2024-12-01,Vila Falcão,8
+2024-12-01,Jardim Bela Vista,15
