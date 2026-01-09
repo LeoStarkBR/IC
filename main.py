@@ -1,5 +1,4 @@
 # Painel de Monitoramento da Dengue - Bauru
-# Versão Final: Gráficos Empilhados (Stack) e Chat com Scroll Independente
 
 import pandas as pd
 import geopandas as gpd
@@ -33,19 +32,20 @@ def carregar_dados():
         dados = pd.read_csv("dados/dengue_bauru.csv")
         clima = pd.read_csv("dados/clima_bauru.csv")
         bairros = gpd.read_file("dados/bairros_bauru.geojson")
-    except FileNotFoundError:
-        dates = pd.date_range(start='2023-01-01', end='2025-12-31', freq='D')
-        dados = pd.DataFrame({
-            'data': dates,
-            'bairro': np.random.choice(['Centro', 'Vila Universitária', 'Mary Dota', 'Geisel', 'Falcao', 'Redentor'], len(dates)),
-            'casos': np.random.poisson(5, len(dates))
-        })
-        clima = pd.DataFrame({
-            'data': dates,
-            'chuva_mm': np.random.gamma(2, 10, len(dates)),
-            'temperatura_media': np.random.normal(28, 4, len(dates))
-        })
-        bairros = gpd.GeoDataFrame() 
+    except FileNotFoundError as e:
+        st.error(
+            f"Erro ao carregar os dados.\n"
+            f"Arquivo não encontrado: {e.filename}\n\n"
+            "Verifique se a pasta 'dados/' e os arquivos CSV/GeoJSON existem."
+        )
+        st.stop()
+    except Exception as e:
+        st.error(
+            "Erro inesperado ao carregar os dados.\n\n"
+            f"Detalhes: {e}"
+        )
+        st.stop()
+
     return dados, clima, bairros
 
 def preparar_dados(dados, clima):
@@ -152,11 +152,11 @@ st.divider()
 col_dashboard, col_ia = st.columns([2.5, 1]) 
 
 # ---------------------------------------------------------
-# COLUNA ESQUERDA: GRÁFICOS EMPILHADOS (STACK)
+# COLUNA ESQUERDA: GRÁFICOS EMPILHADOS
 # ---------------------------------------------------------
 with col_dashboard:
     
-    # 1. Gráfico de Linha (Tendência)
+    # 1. Gráfico de Linha
     with st.container(border=True):
         st.markdown("##### Evolução Temporal")
         df_linha = df_filtrado.groupby('data', as_index=False)['casos'].sum()
@@ -164,31 +164,68 @@ with col_dashboard:
         fig_linha.update_layout(height=350, margin=dict(l=20, r=20, t=10, b=20))
         st.plotly_chart(fig_linha, use_container_width=True)
 
-    # 2. Gráfico Combo (Clima)
+   # 2. Gráfico Combo (Atualizado com Temperatura)
     with st.container(border=True):
-        st.markdown("##### 🌦️ Influência Climática")
-        df_combo = df_filtrado.groupby('data', as_index=False).agg({'casos': 'sum', 'chuva_mm': 'mean'}).sort_values('data')
+        st.markdown("##### Influência Climática")
+        
+        # 1. Adicionamos 'temperatura_media' na agregação
+        df_combo = df_filtrado.groupby('data', as_index=False).agg({
+            'casos': 'sum', 
+            'chuva_mm': 'mean', 
+            'temperatura_media': 'mean'
+        }).sort_values('data')
+        
         fig_combo = go.Figure()
-        fig_combo.add_trace(go.Bar(x=df_combo['data'], y=df_combo['chuva_mm'], name='Chuva', marker_color='#A0C4FF', opacity=0.5, yaxis='y2'))
-        fig_combo.add_trace(go.Scatter(x=df_combo['data'], y=df_combo['casos'], name='Casos', mode='lines', line=dict(color='#FF6B6B', width=2)))
+        
+        # Barras de Chuva (Eixo Y2 - Direita)
+        fig_combo.add_trace(go.Bar(
+            x=df_combo['data'], 
+            y=df_combo['chuva_mm'], 
+            name='Chuva (mm)', 
+            marker_color='#A0C4FF', 
+            opacity=0.5, 
+            yaxis='y2'
+        ))
+        
+        # Nova Linha: Temperatura Média (Eixo Y2 - Direita)
+        # Compartilha o eixo da chuva para manter a correlação climática
+        fig_combo.add_trace(go.Scatter(
+            x=df_combo['data'], 
+            y=df_combo['temperatura_media'], 
+            name='Temp. Média (°C)', 
+            mode='lines', 
+            line=dict(color='#FFA500', width=2, dash='dot'), # Laranja e pontilhada para destacar
+            yaxis='y2' 
+        ))
+
+        # Linha de Casos (Eixo Y1 - Esquerda)
+        fig_combo.add_trace(go.Scatter(
+            x=df_combo['data'], 
+            y=df_combo['casos'], 
+            name='Casos', 
+            mode='lines', 
+            line=dict(color='#FF6B6B', width=2)
+        ))
         
         fig_combo.update_layout(
             height=350,
             yaxis=dict(title="Casos", side="left"),
-            yaxis2=dict(title="Chuva", side="right", overlaying="y", showgrid=False),
+            # Atualizei o título do eixo direito para refletir as duas métricas
+            yaxis2=dict(title="Clima (mm / °C)", side="right", overlaying="y", showgrid=False),
             legend=dict(x=0, y=1.1, orientation='h'),
             margin=dict(l=20, r=20, t=30, b=20)
         )
         st.plotly_chart(fig_combo, use_container_width=True)
 
-    # 3. Módulo Geográfico (Mapa + Tabela)
+    # 3. Módulo Geográfico
     with st.container(border=True):
         st.markdown("##### Análise Geográfica e Risco")
         
         col_mapa, col_tabela = st.columns([1, 1])
         
-        # Mapa na esquerda
-        if not bairros_raw.empty:
+        # Mapa
+        with col_mapa:
+            if not bairros_raw.empty:
                 df_mapa = df_filtrado.groupby('bairro', as_index=False)['casos'].sum()
                 mapa = bairros_raw.merge(df_mapa, left_on='nome', right_on='bairro')
                 if not mapa.empty:
@@ -201,37 +238,36 @@ with col_dashboard:
                     st.plotly_chart(fig_map, use_container_width=True)
                 else:
                     st.warning("Sem dados.")
-        else:
+            else:
                 st.warning("GeoJSON ausente.")
 
-        # Tabela na direita (Corrigida)
-        resumo = df_filtrado.groupby('bairro').agg({'casos':'mean', 'chuva_mm':'mean'}).reset_index()
-        def calc_risco(r):
+        # Tabela (Pré-calculo do resumo para usar no chat depois)
+        with col_tabela:
+            resumo = df_filtrado.groupby('bairro').agg({'casos':'mean', 'chuva_mm':'mean'}).reset_index()
+            def calc_risco(r):
                 if r['casos'] > 50 and r['chuva_mm'] > 120: return 'Alto 🔴'
                 elif r['casos'] > 20: return 'Médio 🟡'
                 else: return 'Baixo 🟢'
             
-        resumo['Risco'] = resumo.apply(calc_risco, axis=1)
-            # Renomeação explícita para evitar KeyError
-        resumo.columns = ['Bairro', 'Média Casos', 'Média Chuva', 'Risco']
+            resumo['Risco'] = resumo.apply(calc_risco, axis=1)
+            resumo.columns = ['Bairro', 'Média Casos', 'Média Chuva', 'Risco']
             
-        st.dataframe(
+            st.dataframe(
                 resumo[['Bairro', 'Risco', 'Média Casos']].sort_values('Média Casos', ascending=False), 
                 use_container_width=True, 
                 hide_index=True,
-        )
+                height=300
+            )
 
 
 # ---------------------------------------------------------
-# COLUNA DIREITA: MÓDULO IA COM SCROLL INDEPENDENTE
+# COLUNA DIREITA: MÓDULO IA
 # ---------------------------------------------------------
 with col_ia:
-
-    with st.container(border=True):
-        st.subheader(" Assistente IA")
+    with st.container(border=True, height=850):
+        st.subheader("💬 Assistente IA")
     
-        # 1. Configuração (Sempre no topo)
-        with st.expander(" Chave API"):
+        with st.expander("⚙️ Chave API"):
             api_key = st.text_input("Gemini Key", type="password", label_visibility="collapsed")
 
         if HAS_GENAI and api_key:
@@ -245,53 +281,67 @@ with col_ia:
                 
                 st.caption(f"Modelo: {nome_modelo}")
 
-                # 2. JANELA DE HISTÓRICO (Com Scroll Próprio)
-                # O st.container(height=...) cria a barra de rolagem interna
-                historico_container = st.container(height=600, border=True)
-
                 if "messages" not in st.session_state:
                     st.session_state.messages = []
 
-                # Renderiza as mensagens DENTRO da janela de histórico
-                with historico_container:
-                    for msg in st.session_state.messages:
-                        with st.chat_message(msg["role"]):
-                            st.markdown(msg["content"])
+                for msg in st.session_state.messages:
+                    with st.chat_message(msg["role"]):
+                        st.markdown(msg["content"])
 
-                # 3. INPUT (Estilo Pill)
-                # O chat_input fica fixo no rodapé da coluna.
                 if prompt := st.chat_input("Pergunte sobre os dados..."):
-                    
-                    # Renderiza pergunta do usuário na janela
-                    with historico_container:
-                        st.chat_message("user").markdown(prompt)
+                    st.chat_message("user").markdown(prompt)
                     st.session_state.messages.append({"role": "user", "content": prompt})
 
-                    # Lógica IA
+                    # --- ENGENHARIA DE CONTEXTO (AQUI ESTÁ A MÁGICA) ---
+                    
+                    # 1. Resumo Estatístico Geral (Para perguntas genéricas)
                     stats = df_filtrado.describe().to_string()
-                    top_bairros = ""
-                    if bairro_selecionado == "Todos":
-                        ranking = df_filtrado.groupby('bairro')['casos'].sum().sort_values(ascending=False).head(5)
-                        top_bairros = f"\nTOP 5 BAIRROS:\n{ranking.to_string()}"
+                    
+                    # 2. Visão do Gráfico de Linha (Agrupado por Mês para a IA entender a tendência)
+                    # Convertemos a série temporal em texto
+                    df_temporal = df_filtrado.set_index('data').resample('ME')['casos'].sum()
+                    vis_temporal = f"TENDÊNCIA MENSAL DE CASOS:\n{df_temporal.to_string()}"
 
+                    # 3. Visão do Mapa e Tabela de Risco (Passamos a tabela inteira)
+                    vis_geografica = f"RISCO POR BAIRRO:\n{resumo.to_string(index=False)}"
+
+                    # 4. Dados Climáticos (Correlação)
+                    corr = df_filtrado['casos'].corr(df_filtrado['chuva_mm'])
+                    vis_clima = f"CORRELAÇÃO CHUVA vs CASOS: {corr:.2f} (Escala -1 a 1)"
+
+                    # Montagem do Prompt Rico
                     contexto = f"""
-                    Analista Dengue Bauru, com respostas curtas e coesas para facilitar o entendimento dos usuários. 
-                    Filtros: {bairro_selecionado} ({ano_selecionado}).
-                    Dados: {stats}
-                    {top_bairros}
-                    Pergunta: {prompt}
+                    Você é um Epidemiologista Senior analisando dados de Dengue em Bauru.
+                    O usuário está vendo gráficos na tela e você deve explicar o que eles mostram.
+                    
+                    FILTROS ATUAIS: {bairro_selecionado} ({ano_selecionado})
+
+                    [DADOS DO GRÁFICO DE LINHA - TEMPO]
+                    {vis_temporal}
+
+                    [DADOS DO MAPA E TABELA - LOCAIS]
+                    {vis_geografica}
+
+                    [DADOS DE CLIMA]
+                    {vis_clima}
+
+                    [ESTATÍSTICAS GERAIS]
+                    {stats}
+                    
+                    PERGUNTA DO USUÁRIO: {prompt}
+                    
+                    Responda de forma direta, citando números e meses específicos que aparecem nos dados acima.
                     """
 
-                    with historico_container:
-                        with st.chat_message("assistant"):
-                            with st.spinner("..."):
-                                try:
-                                    model = genai.GenerativeModel(nome_modelo)
-                                    resp = model.generate_content(contexto)
-                                    st.markdown(resp.text)
-                                    st.session_state.messages.append({"role": "assistant", "content": resp.text})
-                                except Exception as e:
-                                    st.error("Erro IA.")
+                    with st.chat_message("assistant"):
+                        with st.spinner("Analisando gráficos..."):
+                            try:
+                                model = genai.GenerativeModel(nome_modelo)
+                                resp = model.generate_content(contexto)
+                                st.markdown(resp.text)
+                                st.session_state.messages.append({"role": "assistant", "content": resp.text})
+                            except Exception as e:
+                                st.error(f"Erro IA: {e}")
             
             except Exception as e:
                 st.error(f"Erro Config: {e}")
